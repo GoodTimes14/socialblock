@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SocialBlock</string>
+    <string name="monitoring_channel_name">Monitoraggio</string>
+    <string name="alerts_channel_name">Avvisi sui limiti</string>
+    <string name="summary_channel_name">Riepilogo giornaliero</string>
+</resources>
+

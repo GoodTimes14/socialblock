@@ -1,0 +1,20 @@
+complexity:
+    CyclomaticComplexMethod:
+        allowedComplexity: 20
+    LongMethod:
+        allowedLines: 130
+    TooManyFunctions:
+        allowedFunctionsPerFile: 20
+        allowedFunctionsPerClass: 15
+
+naming:
+    FunctionNaming:
+        # Jetpack Compose convention requires public composables to start uppercase.
+        functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+
+style:
+    LoopWithTooManyJumpStatements:
+        maxJumpCount: 2
+    MaxLineLength:
+        maxLineLength: 140
+
