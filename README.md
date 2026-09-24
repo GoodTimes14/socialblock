@@ -10,7 +10,7 @@ Everything runs on your device: no account, no network access, no screen reading
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 <p align="center">
-  <img src="docs/screenshots/overlay-youtube-video.png" width="520" alt="SocialBlock warning overlay on top of a YouTube video">
+  <img src="docs/screenshots/overlay-youtube.png" width="360" alt="SocialBlock warning overlay on top of YouTube">
 </p>
 
 ## Features
@@ -44,7 +44,7 @@ Everything runs on your device: no account, no network access, no screen reading
 
 | Dashboard | App limit | Settings | Overlay on YouTube |
 |:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/dashboard.png" width="200" alt="Dashboard"> | <img src="docs/screenshots/app-detail.png" width="200" alt="Per-app limit screen"> | <img src="docs/screenshots/settings.png" width="200" alt="Settings"> | <img src="docs/screenshots/overlay-youtube-video.png" width="200" alt="Overlay over YouTube"> |
+| <img src="docs/screenshots/dashboard.png" width="200" alt="Dashboard"> | <img src="docs/screenshots/app-detail.png" width="200" alt="Per-app limit screen"> | <img src="docs/screenshots/settings.png" width="200" alt="Settings"> | <img src="docs/screenshots/overlay-youtube.png" width="200" alt="Overlay over YouTube"> |
 
 > The user interface is currently in Italian.
 
@@ -109,6 +109,31 @@ The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`. Install
 ./gradlew ktlintCheck detekt          # code style and static analysis
 ./gradlew connectedDebugAndroidTest   # instrumented tests (emulator or device required)
 ```
+
+## Releases
+
+Signed APKs are published on the [Releases](https://github.com/GoodTimes14/socialblock/releases)
+page by the [release workflow](.github/workflows/release.yml). To publish a new version:
+
+1. Bump `versionCode` and `versionName` in `app/build.gradle.kts` and commit.
+2. Tag the commit with the matching version and push the tag:
+
+   ```bash
+   git tag v1.0.0
+   git push origin v1.0.0
+   ```
+
+The workflow runs the unit tests, builds a signed release APK and attaches it (with its SHA-256
+checksum) to a new GitHub release. It needs these repository secrets:
+
+| Secret | Value |
+|---|---|
+| `SOCIALBLOCK_KEYSTORE_BASE64` | The release keystore, base64-encoded |
+| `SOCIALBLOCK_KEYSTORE_PASSWORD` | Keystore password |
+| `SOCIALBLOCK_KEY_ALIAS` | Key alias inside the keystore |
+| `SOCIALBLOCK_KEY_PASSWORD` | Key password |
+
+Without these environment variables, local `./gradlew assembleRelease` builds produce an unsigned APK.
 
 ## Getting started
 

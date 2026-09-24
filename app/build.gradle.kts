@@ -22,12 +22,27 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    // Release signing is configured only when the keystore is provided through environment
+    // variables (as the GitHub release workflow does); otherwise release builds stay unsigned.
+    val releaseKeystorePath = System.getenv("SOCIALBLOCK_KEYSTORE_PATH")
+    signingConfigs {
+        if (releaseKeystorePath != null) {
+            create("release") {
+                storeFile = file(releaseKeystorePath)
+                storePassword = System.getenv("SOCIALBLOCK_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("SOCIALBLOCK_KEY_ALIAS")
+                keyPassword = System.getenv("SOCIALBLOCK_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
