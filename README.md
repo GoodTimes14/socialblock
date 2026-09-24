@@ -133,6 +133,9 @@ checksum) to a new GitHub release. It needs these repository secrets:
 | `SOCIALBLOCK_KEY_ALIAS` | Key alias inside the keystore |
 | `SOCIALBLOCK_KEY_PASSWORD` | Key password |
 
+To check the signed build without publishing anything, run the workflow manually from the
+repository's **Actions** tab (**Release → Run workflow**).
+
 Without these environment variables, local `./gradlew assembleRelease` builds produce an unsigned APK.
 
 ## Getting started
