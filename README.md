@@ -5,7 +5,7 @@ Pick the apps you want to keep in check, give each one a daily time limit, and S
 remind you while you use them — with warning messages inspired by the labels on cigarette packs —
 and send you back to the Home screen when your time is up.
 
-Everything runs on your device: no account, no network access, no screen reading.
+Everything runs on your device: no account, no network access, no reading of what's on screen.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
@@ -27,6 +27,18 @@ Everything runs on your device: no account, no network access, no screen reading
   The overlay is semi-transparent and **touch-through**: it never takes focus or intercepts
   touches, so the app underneath works exactly as usual. You can edit the messages and change how
   often they rotate, the overlay's opacity, and its position (top, center, bottom).
+- **Block only Reels and Shorts** – an optional dashboard switch for Instagram and YouTube only:
+  when their limit is reached, SocialBlock keeps the app open and closes just the Reels / Shorts
+  panel (with a Back action) whenever you open it, instead of sending you to the Home screen.
+  The panel is recognised only by its view ID (`clips_viewer_view_pager` on Instagram,
+  `reel_recycler` / `reel_player_page_container` on YouTube). This needs SocialBlock's
+  Accessibility Service; until it is turned on, the whole app keeps being closed at the limit.
+- **Always block Reels, Shorts and X videos** – a second dashboard switch that closes Reels, Shorts
+  and X's full-screen scrolling video feed at any time, even in apps with no timer or not monitored
+  at all. While it is on, Instagram and YouTube go back to the normal limit flow: when their time is
+  up, the whole app is closed. X's feed is recognised by its video player's view ID
+  (`exo_content_frame`) covering most of the screen, so smaller timeline videos keep playing. The
+  emergency pause suspends this block too.
 - **Emergency pause** – one tap (in the app or straight from the ongoing notification) suspends
   every timer for 15 minutes, for when you really need that app.
 - **Notifications**
@@ -35,8 +47,10 @@ Everything runs on your device: no account, no network access, no screen reading
   - when the emergency pause is turned on
   - a daily usage summary at a time you choose (22:00 by default)
 - **Privacy by design** – usage data stays in a local Room database and DataStore, excluded from
-  cloud backup and device transfer. SocialBlock does not use an Accessibility Service, does not read
-  screen contents or browsing data, and does not request the `INTERNET` permission.
+  cloud backup and device transfer. SocialBlock does not read screen contents or browsing data,
+  and does not request the `INTERNET` permission. The optional Accessibility Service listens only
+  to Instagram, YouTube and X, checks only whether the Reels / Shorts / video view ID is visible, and never
+  reads text or stores anything.
 - **Battery friendly** – usage events are processed incrementally, with adaptive polling that
   speeds up only while a tracked app is in the foreground.
 
@@ -58,6 +72,7 @@ SocialBlock asks for each permission only when it's needed, and explains why on 
 | Display over other apps (`SYSTEM_ALERT_WINDOW`) | Show the touch-through warning overlay |
 | Notifications (`POST_NOTIFICATIONS`) | Limit alerts, the daily summary and the emergency action |
 | Foreground service, boot completed | Keep monitoring running and restore it after a reboot |
+| Accessibility Service (optional) | Recognise the Reels / Shorts / X video panel by its view ID, only when "Blocca solo Reels e Shorts" or "Blocca sempre Reels, Shorts e video di X" is on |
 
 > Android doesn't let regular apps force-stop other apps, so SocialBlock enforces limits by
 > sending you to the Home screen using public platform APIs.
@@ -145,6 +160,11 @@ Without these environment variables, local `./gradlew assembleRelease` builds pr
 3. Set the daily limit and turn on warning messages from the app's page.
 4. Grant **display over other apps** and **notifications** to enable the overlay and alerts.
 5. Customize messages, overlay position/opacity and the daily-summary time in **Impostazioni**.
+6. Optionally turn on **Blocca solo Reels e Shorts** or **Blocca sempre Reels, Shorts e video di X**
+   on the dashboard, tap **Configura** and enable *SocialBlock: blocco Reels, Shorts e video di X*
+   in Android's Accessibility settings. On Android 13+, if the
+   APK was installed from a browser or file manager, Android greys this option out: open
+   *App info → ⋮ → Allow restricted settings* first.
 
 ## License
 

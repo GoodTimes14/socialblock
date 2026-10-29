@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only Instagram, YouTube and X: keep packageNames in sync with ShortFormPanels. -->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/short_form_blocker_description"
+    android:notificationTimeout="250"
+    android:packageNames="com.instagram.android,com.google.android.youtube,com.twitter.android" />

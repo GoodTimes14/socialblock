@@ -50,7 +50,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class PermissionActions(val requestUsageAccess: () -> Unit, val requestOverlay: () -> Unit, val requestNotifications: () -> Unit)
+data class PermissionActions(
+    val requestUsageAccess: () -> Unit,
+    val requestOverlay: () -> Unit,
+    val requestNotifications: () -> Unit,
+    val requestShortFormBlocker: () -> Unit,
+)
 
 @Composable
 private fun rememberPermissionActions(viewModel: MainViewModel): PermissionActions {
@@ -80,6 +85,9 @@ private fun rememberPermissionActions(viewModel: MainViewModel): PermissionActio
                         .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName),
                 )
             }
+        },
+        requestShortFormBlocker = {
+            context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         },
     )
 }

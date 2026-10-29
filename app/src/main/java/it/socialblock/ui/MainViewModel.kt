@@ -48,6 +48,7 @@ sealed interface OverlaySettingsUpdate {
     data class ChangeDelay(val seconds: Int) : OverlaySettingsUpdate
 }
 
+@Suppress("TooManyFunctions")
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val trackingRepository: TrackingRepository,
@@ -220,6 +221,14 @@ class MainViewModel @Inject constructor(
 
     fun setMonitoringEnabled(enabled: Boolean) {
         viewModelScope.launch { updateMonitoringEnabled(enabled) }
+    }
+
+    fun setShortFormOnlyBlockEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setShortFormOnlyBlockEnabled(enabled) }
+    }
+
+    fun setShortFormAlwaysBlockEnabled(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setShortFormAlwaysBlockEnabled(enabled) }
     }
 
     fun enableEmergencyBypass() {

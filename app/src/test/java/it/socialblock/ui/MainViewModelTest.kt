@@ -1,6 +1,8 @@
 package it.socialblock.ui
 
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -86,6 +88,38 @@ class MainViewModelTest {
         runCurrent()
 
         verify(exactly = 0) { usageStatsSource.snapshot(any(), any()) }
+    }
+
+    @Test
+    fun `reels and shorts switch is saved in the settings`() = runTest(mainDispatcherRule.dispatcher) {
+        every { trackingRepository.observeTrackedApps() } returns flowOf(emptyList())
+        every { settingsRepository.settings } returns flowOf(AppSettings())
+        coEvery { settingsRepository.setShortFormOnlyBlockEnabled(any()) } returns Unit
+        every { permissionChecker.current() } returns PermissionState()
+        every { timeProvider.nowMillis() } returns 1_000L
+
+        val viewModel = createViewModel()
+        runCurrent()
+        viewModel.setShortFormOnlyBlockEnabled(true)
+        runCurrent()
+
+        coVerify(exactly = 1) { settingsRepository.setShortFormOnlyBlockEnabled(true) }
+    }
+
+    @Test
+    fun `always on reels and shorts switch is saved in the settings`() = runTest(mainDispatcherRule.dispatcher) {
+        every { trackingRepository.observeTrackedApps() } returns flowOf(emptyList())
+        every { settingsRepository.settings } returns flowOf(AppSettings())
+        coEvery { settingsRepository.setShortFormAlwaysBlockEnabled(any()) } returns Unit
+        every { permissionChecker.current() } returns PermissionState()
+        every { timeProvider.nowMillis() } returns 1_000L
+
+        val viewModel = createViewModel()
+        runCurrent()
+        viewModel.setShortFormAlwaysBlockEnabled(true)
+        runCurrent()
+
+        coVerify(exactly = 1) { settingsRepository.setShortFormAlwaysBlockEnabled(true) }
     }
 
     private fun createViewModel() = MainViewModel(

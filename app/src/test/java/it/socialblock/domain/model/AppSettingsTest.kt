@@ -1,6 +1,7 @@
 package it.socialblock.domain.model
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class AppSettingsTest {
@@ -21,6 +22,12 @@ class AppSettingsTest {
             AppSettings(overlayOpacityPercent = 100).overlayOpacity,
             FLOAT_TOLERANCE,
         )
+    }
+
+    @Test
+    fun `reels and shorts blocks are off by default`() {
+        assertFalse(AppSettings().shortFormOnlyBlockEnabled)
+        assertFalse(AppSettings().shortFormAlwaysBlockEnabled)
     }
 
     private companion object {

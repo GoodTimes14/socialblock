@@ -9,6 +9,7 @@ import androidx.core.app.NotificationManagerCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import it.socialblock.MainActivity
 import it.socialblock.R
+import it.socialblock.domain.limits.LimitEnforcement
 import it.socialblock.domain.model.TrackedApp
 import it.socialblock.monitoring.EmergencyBypassReceiver
 import it.socialblock.platform.format.formatDuration
@@ -57,12 +58,17 @@ class AppNotifier @Inject constructor(@param:ApplicationContext private val cont
         )
     }
 
-    fun limitReached(app: TrackedApp) {
+    fun limitReached(app: TrackedApp, enforcement: LimitEnforcement) {
+        val detail =
+            when (enforcement) {
+                LimitEnforcement.ReturnHome -> "L'app verrà chiusa. Usa la pausa solo in caso di necessità."
+                is LimitEnforcement.BlockShortForm -> "${enforcement.feature.name} verranno chiusi, il resto dell'app resta disponibile."
+            }
         notifySafely(
             reachedId(app.packageName),
             baseBuilder(NotificationChannels.ALERTS)
                 .setContentTitle("Limite raggiunto per ${app.displayName}")
-                .setContentText("L'app verrà chiusa. Usa la pausa solo in caso di necessità.")
+                .setContentText(detail)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .addAction(0, "Pausa emergenza 15 min", emergencyBypassPendingIntent())

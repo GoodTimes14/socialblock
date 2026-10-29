@@ -9,6 +9,8 @@ import androidx.core.app.ServiceCompat
 import dagger.hilt.android.AndroidEntryPoint
 import it.socialblock.data.repository.TrackingRepository
 import it.socialblock.data.settings.SettingsRepository
+import it.socialblock.domain.limits.LimitEnforcement
+import it.socialblock.domain.limits.LimitEnforcementPolicy
 import it.socialblock.domain.limits.LimitEvaluator
 import it.socialblock.domain.limits.LimitStatus
 import it.socialblock.domain.model.AppSettings
@@ -42,6 +44,10 @@ class UsageMonitoringService : Service() {
 
     @Inject lateinit var evaluator: LimitEvaluator
 
+    @Inject lateinit var enforcementPolicy: LimitEnforcementPolicy
+
+    @Inject lateinit var shortFormBlockState: ShortFormBlockState
+
     @Inject lateinit var overlayController: WarningOverlayController
 
     @Inject lateinit var overlayMessageProvider: OverlayMessageProvider
@@ -74,6 +80,7 @@ class UsageMonitoringService : Service() {
     override fun onDestroy() {
         serviceScope.launch { overlayController.hide() }
         serviceScope.cancel()
+        shortFormBlockState.updateLimitBlockedPackages(emptySet())
         super.onDestroy()
     }
 
@@ -101,6 +108,7 @@ class UsageMonitoringService : Service() {
             .collectLatest { configuration ->
                 if (!configuration.settings.monitoringEnabled || configuration.apps.isEmpty()) {
                     overlayController.hide()
+                    shortFormBlockState.updateLimitBlockedPackages(emptySet())
                     stopSelf()
                     return@collectLatest
                 }
@@ -110,10 +118,10 @@ class UsageMonitoringService : Service() {
                         try {
                             monitorOnce(configuration.settings, configuration.apps)
                         } catch (_: SecurityException) {
-                            overlayController.hide()
+                            stopEnforcing()
                             false
                         } catch (_: RuntimeException) {
-                            overlayController.hide()
+                            stopEnforcing()
                             false
                         }
                     delay(
@@ -142,38 +150,19 @@ class UsageMonitoringService : Service() {
             lastSnapshotSavedAt = nowMillis
         }
 
-        apps.forEach { app ->
-            val usedMillis = snapshot.usageByPackage[app.packageName] ?: 0L
-            when (val status = evaluator.evaluate(app, usedMillis, bypassActive)) {
-                is LimitStatus.Approaching -> {
-                    if (app.lastApproachingNoticeDate != localDate) {
-                        notifier.approachingLimit(app, status.remainingMillis)
-                        trackingRepository.markApproachingNotice(app.packageName, localDate)
-                    }
-                }
-
-                LimitStatus.Reached -> {
-                    if (app.lastLimitNoticeDate != localDate) {
-                        notifier.limitReached(app)
-                        trackingRepository.markLimitNotice(app.packageName, localDate)
-                    }
-                }
-
-                LimitStatus.Available,
-                LimitStatus.Bypassed,
-                -> Unit
-            }
-        }
+        val shortFormBlockedPackages = applyLimits(settings, apps, snapshot.usageByPackage, bypassActive, localDate)
+        shortFormBlockState.updateLimitBlockedPackages(shortFormBlockedPackages)
 
         val foregroundApp = apps.firstOrNull { it.packageName == snapshot.foregroundPackage }
         when {
             bypassActive || foregroundApp == null -> overlayController.hide()
 
-            evaluator.evaluate(
-                foregroundApp,
-                snapshot.usageByPackage[foregroundApp.packageName] ?: 0L,
-                bypassActive = false,
-            ) == LimitStatus.Reached -> {
+            foregroundApp.packageName !in shortFormBlockedPackages &&
+                evaluator.evaluate(
+                    foregroundApp,
+                    snapshot.usageByPackage[foregroundApp.packageName] ?: 0L,
+                    bypassActive = false,
+                ) == LimitStatus.Reached -> {
                 overlayController.hide()
                 limitEnforcer.returnToHome()
             }
@@ -218,6 +207,56 @@ class UsageMonitoringService : Service() {
             lastNotificationState = notificationState
         }
         return foregroundApp != null
+    }
+
+    /** Sends the limit notices and returns the apps whose Reels/Shorts must be closed. */
+    private suspend fun applyLimits(
+        settings: AppSettings,
+        apps: List<TrackedApp>,
+        usageByPackage: Map<String, Long>,
+        bypassActive: Boolean,
+        localDate: String,
+    ): Set<String> {
+        val shortFormBlockedPackages = mutableSetOf<String>()
+        apps.forEach { app ->
+            val usedMillis = usageByPackage[app.packageName] ?: 0L
+            when (val status = evaluator.evaluate(app, usedMillis, bypassActive)) {
+                is LimitStatus.Approaching -> {
+                    if (app.lastApproachingNoticeDate != localDate) {
+                        notifier.approachingLimit(app, status.remainingMillis)
+                        trackingRepository.markApproachingNotice(app.packageName, localDate)
+                    }
+                }
+
+                LimitStatus.Reached -> {
+                    val enforcement = limitEnforcement(app.packageName, settings)
+                    if (enforcement is LimitEnforcement.BlockShortForm) {
+                        shortFormBlockedPackages += app.packageName
+                    }
+                    if (app.lastLimitNoticeDate != localDate) {
+                        notifier.limitReached(app, enforcement)
+                        trackingRepository.markLimitNotice(app.packageName, localDate)
+                    }
+                }
+
+                LimitStatus.Available,
+                LimitStatus.Bypassed,
+                -> Unit
+            }
+        }
+        return shortFormBlockedPackages
+    }
+
+    private fun limitEnforcement(packageName: String, settings: AppSettings): LimitEnforcement = enforcementPolicy.enforcementFor(
+        packageName = packageName,
+        shortFormOnlyBlockEnabled = settings.shortFormOnlyBlockEnabled,
+        shortFormAlwaysBlockEnabled = settings.shortFormAlwaysBlockEnabled,
+        shortFormBlockerConnected = shortFormBlockState.blockerConnected.value,
+    )
+
+    private suspend fun stopEnforcing() {
+        overlayController.hide()
+        shortFormBlockState.updateLimitBlockedPackages(emptySet())
     }
 
     private fun localDate(nowMillis: Long): String = Instant.ofEpochMilli(nowMillis).atZone(ZoneId.systemDefault()).toLocalDate().toString()

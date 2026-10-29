@@ -4,5 +4,7 @@
     <string name="monitoring_channel_name">Monitoraggio</string>
     <string name="alerts_channel_name">Avvisi sui limiti</string>
     <string name="summary_channel_name">Riepilogo giornaliero</string>
+    <string name="short_form_blocker_label">SocialBlock: blocco Reels, Shorts e video di X</string>
+    <string name="short_form_blocker_description">Con \"Blocca sempre Reels, Shorts e video di X\" attivo, SocialBlock chiude Reels, Shorts e i video a scorrimento di X sempre, anche nelle app senza timer. Con \"Blocca solo Reels e Shorts\" attivo, quando Instagram o YouTube raggiungono il limite giornaliero SocialBlock chiude solo Reels e Shorts e lascia utilizzabile il resto dell\'app. Riconosce soltanto l\'ID del pannello aperto: non legge testi o contenuti e non salva nulla.</string>
 </resources>
 

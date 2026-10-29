@@ -47,6 +47,19 @@
                 android:value="Local monitoring of user-selected app usage and time limits" />
         </service>
 
+        <service
+            android:name=".monitoring.ShortFormAccessibilityService"
+            android:exported="false"
+            android:label="@string/short_form_blocker_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/short_form_accessibility_service" />
+        </service>
+
         <receiver
             android:name=".monitoring.EmergencyBypassReceiver"
             android:exported="false" />

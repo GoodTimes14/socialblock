@@ -43,6 +43,8 @@ fun SocialBlockApp(state: MainUiState, viewModel: MainViewModel, permissionActio
                 onHideAppPicker = viewModel::hideAppPicker,
                 onAddApp = viewModel::addApp,
                 onMonitoringChanged = viewModel::setMonitoringEnabled,
+                onShortFormOnlyBlockChanged = viewModel::setShortFormOnlyBlockEnabled,
+                onShortFormAlwaysBlockChanged = viewModel::setShortFormAlwaysBlockEnabled,
                 onEnableEmergencyBypass = viewModel::enableEmergencyBypass,
                 onClearEmergencyBypass = viewModel::clearEmergencyBypass,
                 permissionActions = permissionActions,

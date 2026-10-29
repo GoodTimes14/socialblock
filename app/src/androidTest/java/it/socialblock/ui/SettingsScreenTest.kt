@@ -45,7 +45,7 @@ class SettingsScreenTest {
                     onUpdateOverlayMessage = { _, _ -> },
                     onRemoveOverlayMessage = {},
                     onUpdateOverlayMessageChangeDelay = {},
-                    permissionActions = PermissionActions({}, {}, {}),
+                    permissionActions = PermissionActions({}, {}, {}, {}),
                 )
             }
         }
@@ -72,7 +72,7 @@ class SettingsScreenTest {
                     onUpdateOverlayMessage = { index, message -> updatedMessage = index to message },
                     onRemoveOverlayMessage = { removedIndex = it },
                     onUpdateOverlayMessageChangeDelay = {},
-                    permissionActions = PermissionActions({}, {}, {}),
+                    permissionActions = PermissionActions({}, {}, {}, {}),
                 )
             }
         }
@@ -106,7 +106,7 @@ class SettingsScreenTest {
                     onUpdateOverlayMessage = { _, _ -> },
                     onRemoveOverlayMessage = {},
                     onUpdateOverlayMessageChangeDelay = { delaySeconds = it },
-                    permissionActions = PermissionActions({}, {}, {}),
+                    permissionActions = PermissionActions({}, {}, {}, {}),
                 )
             }
         }
@@ -138,7 +138,7 @@ class SettingsScreenTest {
                     onUpdateOverlayMessage = { _, _ -> },
                     onRemoveOverlayMessage = {},
                     onUpdateOverlayMessageChangeDelay = {},
-                    permissionActions = PermissionActions({}, {}, {}),
+                    permissionActions = PermissionActions({}, {}, {}, {}),
                 )
             }
         }

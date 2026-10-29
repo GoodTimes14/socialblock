@@ -64,6 +64,8 @@ class SettingsRepository @Inject constructor(@param:ApplicationContext private v
                                 AppSettings.MIN_OVERLAY_MESSAGE_CHANGE_DELAY_SECONDS,
                                 AppSettings.MAX_OVERLAY_MESSAGE_CHANGE_DELAY_SECONDS,
                             ),
+                    shortFormOnlyBlockEnabled = preferences[Keys.SHORT_FORM_ONLY_BLOCK_ENABLED] ?: false,
+                    shortFormAlwaysBlockEnabled = preferences[Keys.SHORT_FORM_ALWAYS_BLOCK_ENABLED] ?: false,
                 )
             }
 
@@ -77,6 +79,18 @@ class SettingsRepository @Inject constructor(@param:ApplicationContext private v
     suspend fun setMonitoringEnabled(enabled: Boolean) {
         context.settingsDataStore.edit { preferences ->
             preferences[Keys.MONITORING_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setShortFormOnlyBlockEnabled(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[Keys.SHORT_FORM_ONLY_BLOCK_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setShortFormAlwaysBlockEnabled(enabled: Boolean) {
+        context.settingsDataStore.edit { preferences ->
+            preferences[Keys.SHORT_FORM_ALWAYS_BLOCK_ENABLED] = enabled
         }
     }
 
@@ -162,6 +176,8 @@ class SettingsRepository @Inject constructor(@param:ApplicationContext private v
         val OVERLAY_MESSAGES = stringPreferencesKey("overlay_messages")
         val OVERLAY_MESSAGE_CHANGE_DELAY_SECONDS =
             intPreferencesKey("overlay_message_change_delay_seconds")
+        val SHORT_FORM_ONLY_BLOCK_ENABLED = booleanPreferencesKey("short_form_only_block_enabled")
+        val SHORT_FORM_ALWAYS_BLOCK_ENABLED = booleanPreferencesKey("short_form_always_block_enabled")
     }
 
     companion object {

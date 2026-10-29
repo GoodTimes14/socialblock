@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Button
@@ -77,6 +78,8 @@ fun DashboardScreen(
     onHideAppPicker: () -> Unit,
     onAddApp: (InstalledApp) -> Unit,
     onMonitoringChanged: (Boolean) -> Unit,
+    onShortFormOnlyBlockChanged: (Boolean) -> Unit,
+    onShortFormAlwaysBlockChanged: (Boolean) -> Unit,
     onEnableEmergencyBypass: () -> Unit,
     onClearEmergencyBypass: () -> Unit,
     permissionActions: PermissionActions,
@@ -134,6 +137,16 @@ fun DashboardScreen(
                         onClear = onClearEmergencyBypass,
                     )
                 }
+                item {
+                    ShortFormCard(
+                        onlyAtLimitEnabled = state.settings.shortFormOnlyBlockEnabled,
+                        alwaysEnabled = state.settings.shortFormAlwaysBlockEnabled,
+                        blockerGranted = state.permissions.shortFormBlocker,
+                        onOnlyAtLimitChanged = onShortFormOnlyBlockChanged,
+                        onAlwaysChanged = onShortFormAlwaysBlockChanged,
+                        onConfigure = permissionActions.requestShortFormBlocker,
+                    )
+                }
                 if (!state.permissions.allRequiredGranted) {
                     item {
                         PermissionCard(state, permissionActions)
@@ -171,7 +184,8 @@ fun DashboardScreen(
                 }
                 item {
                     Text(
-                        "I dati di utilizzo restano su questo dispositivo. SocialBlock non legge lo schermo né la navigazione.",
+                        "I dati di utilizzo restano su questo dispositivo. " +
+                            "SocialBlock non legge i contenuti dello schermo né la navigazione.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 12.dp),
@@ -303,6 +317,111 @@ private fun EmergencyCard(bypassActive: Boolean, bypassUntilMillis: Long, onEnab
                 OutlinedButton(onClick = onEnable) { Text("Attiva") }
             }
         }
+    }
+}
+
+@Composable
+private fun ShortFormCard(
+    onlyAtLimitEnabled: Boolean,
+    alwaysEnabled: Boolean,
+    blockerGranted: Boolean,
+    onOnlyAtLimitChanged: (Boolean) -> Unit,
+    onAlwaysChanged: (Boolean) -> Unit,
+    onConfigure: () -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = CardDefaults.outlinedCardBorder(),
+        modifier = Modifier.fillMaxWidth().testTag("short_form_card"),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                Icon(
+                    Icons.Outlined.VideoLibrary,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(30.dp),
+                )
+                ShortFormSwitchRow(
+                    title = "Blocca solo Reels e Shorts",
+                    detail =
+                        if (alwaysEnabled) {
+                            "Non serve con il blocco sempre attivo: al limite Instagram e YouTube vengono chiusi"
+                        } else {
+                            "Al limite Instagram e YouTube restano aperti: si chiudono solo Reels e Shorts"
+                        },
+                    checked = onlyAtLimitEnabled && !alwaysEnabled,
+                    enabled = !alwaysEnabled,
+                    onCheckedChange = onOnlyAtLimitChanged,
+                    switchTag = "short_form_switch",
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            HorizontalDivider()
+            ShortFormSwitchRow(
+                title = "Blocca sempre Reels, Shorts e video di X",
+                detail = "Anche nelle app senza timer. Al limite Instagram e YouTube vengono chiusi del tutto",
+                checked = alwaysEnabled,
+                enabled = true,
+                onCheckedChange = onAlwaysChanged,
+                switchTag = "short_form_always_switch",
+                modifier = Modifier.padding(start = 44.dp),
+            )
+            if ((onlyAtLimitEnabled || alwaysEnabled) && !blockerGranted) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        "Attiva il servizio di accessibilità di SocialBlock: riconosce solo l'ID del pannello aperto. " +
+                            if (alwaysEnabled) {
+                                "Finché è spento, Reels, Shorts e video di X non vengono bloccati."
+                            } else {
+                                "Finché è spento, al limite l'app viene chiusa."
+                            },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f),
+                    )
+                    OutlinedButton(onClick = onConfigure) { Text("Configura") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShortFormSwitchRow(
+    title: String,
+    detail: String,
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    switchTag: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = checked,
+            enabled = enabled,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.testTag(switchTag),
+        )
     }
 }
 

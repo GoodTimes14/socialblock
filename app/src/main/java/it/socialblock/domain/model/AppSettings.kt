@@ -9,6 +9,8 @@ data class AppSettings(
     val overlayOpacityPercent: Int = DEFAULT_OVERLAY_OPACITY_PERCENT,
     val overlayMessages: List<String> = DEFAULT_OVERLAY_MESSAGES,
     val overlayMessageChangeDelaySeconds: Int = DEFAULT_OVERLAY_MESSAGE_CHANGE_DELAY_SECONDS,
+    val shortFormOnlyBlockEnabled: Boolean = false,
+    val shortFormAlwaysBlockEnabled: Boolean = false,
 ) {
     fun isEmergencyBypassActive(nowMillis: Long): Boolean = emergencyBypassUntilMillis > nowMillis
 
